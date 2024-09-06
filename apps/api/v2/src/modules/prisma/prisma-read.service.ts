@@ -10,14 +10,8 @@ export class PrismaReadService implements OnModuleInit, OnModuleDestroy {
   public prisma: PrismaClient;
 
   constructor(readonly configService: ConfigService) {
-    const dbUrl = configService.get("db.readUrl", { infer: true });
-
     this.prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: dbUrl,
-        },
-      },
+        datasources: { db: { url: process.env.DATABASE_URL } }
     });
   }
 
