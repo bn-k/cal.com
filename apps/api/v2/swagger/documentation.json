@@ -1368,7 +1368,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "number"
+              "$ref": "#/components/schemas/ID"
             }
           },
           {
@@ -1376,7 +1376,8 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "number"
+              "type": "number",
+              "$ref": "#/components/schemas/ID"
             }
           }
         ],
@@ -2454,7 +2455,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "number"
+              "$ref": "#/components/schemas/ID"
             }
           }
         ],
@@ -2482,7 +2483,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/ID"
             }
           }
         ],
@@ -2520,7 +2521,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "number"
+              "$ref": "#/components/schemas/ID"
             }
           }
         ],
@@ -7616,17 +7617,20 @@
           "days": {
             "type": "array",
             "items": {
-              "type": "number"
+              "type": "integer"
             }
           },
           "startTime": {
-            "type": "number"
+            "description": "The start time of the working hours in minutes",
+            "type": "integer"
           },
           "endTime": {
-            "type": "number"
+            "description": "The end time of the working hours in minutes",
+            "type": "integer"
           },
           "userId": {
-            "type": "number",
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },
@@ -7643,24 +7647,24 @@
             "$ref": "#/components/schemas/ID"
           },
           "userId": {
-            "type": "number",
-            "nullable": true
+            "$ref": "#/components/schemas/IDNullable"
           },
           "eventTypeId": {
-            "type": "number",
-            "nullable": true
+            "$ref": "#/components/schemas/IDNullable"
           },
           "days": {
             "type": "array",
             "items": {
-              "type": "number"
+              "type": "integer"
             }
           },
           "startTime": {
+            "description": "The start time of the availability, it's today date with the time",
             "format": "date-time",
             "type": "string"
           },
           "endTime": {
+            "description": "The end time of the availability, it's today date with the time",
             "format": "date-time",
             "type": "string"
           },
@@ -7671,7 +7675,8 @@
           },
           "scheduleId": {
             "type": "number",
-            "nullable": true
+            "nullable": true,
+            "$ref": "#/components/schemas/IDNullable"
           }
         },
         "required": [
@@ -7680,6 +7685,18 @@
           "startTime",
           "endTime"
         ]
+      },
+      "WeekTimeRange": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DayTimeRange"
+        }
+      },
+      "DayTimeRange": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TimeRange"
+        }
       },
       "TimeRange": {
         "type": "object",
@@ -7701,6 +7718,12 @@
           "start",
           "end"
         ]
+      },
+      "Schedules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ScheduleOutput"
+        }
       },
       "ScheduleOutput": {
         "type": "object",
@@ -7845,7 +7868,7 @@
             ]
           },
           "data": {
-            "$ref": "#/components/schemas/ScheduleOutput"
+            "$ref": "#/components/schemas/Schedules"
           }
         },
         "required": [
@@ -7866,24 +7889,7 @@
             "type": "boolean"
           },
           "schedule": {
-            "example": [
-              [],
-              [
-                {
-                  "start": "2022-01-01T00:00:00.000Z",
-                  "end": "2022-01-02T00:00:00.000Z"
-                }
-              ],
-              [],
-              [],
-              [],
-              [],
-              []
-            ],
-            "items": {
-              "type": "array"
-            },
-            "type": "array"
+            "$ref": "#/components/schemas/WeekTimeRange"
           },
           "dateOverrides": {
             "example": [
@@ -9665,7 +9671,12 @@
       },
       "ID": {
         "type": "integer",
-        "format": "uint64"
+        "format": "int32"
+      },
+      "IDNullable": {
+        "type": "integer",
+        "format": "int32",
+        "nullable": true
       }
     }
   }
