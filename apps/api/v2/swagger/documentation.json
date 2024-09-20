@@ -7995,19 +7995,19 @@
           "endTime"
         ]
       },
-      "WeekTimeRange": {
+      "WeekSlots": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/DayTimeRange"
+          "$ref": "#/components/schemas/DaySlots"
         }
       },
-      "DayTimeRange": {
+      "DaySlots": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/TimeRange"
+          "$ref": "#/components/schemas/Slot"
         }
       },
-      "TimeRange": {
+      "Slot": {
         "type": "object",
         "properties": {
           "userId": {
@@ -8059,13 +8059,7 @@
             }
           },
           "availability": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/TimeRange"
-              }
-            }
+            "$ref": "#/components/schemas/WeekSlots"
           },
           "timeZone": {
             "type": "string"
@@ -8198,7 +8192,7 @@
             "type": "boolean"
           },
           "schedule": {
-            "$ref": "#/components/schemas/WeekTimeRange"
+            "$ref": "#/components/schemas/WeekSlots"
           },
           "dateOverrides": {
             "example": [
