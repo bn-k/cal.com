@@ -64,7 +64,7 @@ class CreateRetellLLMCommand implements Command<TCreateRetellLLMSchema> {
 
   async execute(): Promise<TCreateRetellLLMSchema> {
     try {
-      const createdRetellLLM = await fetcher("/create-retell-llm", {
+      const createdRetellLLM = await fetcher("/create-retell-ai", {
         method: "POST",
         body: JSON.stringify({
           general_prompt: this.props.generalPrompt,
