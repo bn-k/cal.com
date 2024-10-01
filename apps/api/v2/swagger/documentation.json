@@ -3590,25 +3590,159 @@
     },
     "/v2/slots/available": {
       "get": {
+        "summary": "Retrieve Available Time Slots",
+        "description": "Fetches available time slots for scheduling events based on specified criteria such as date range, event type, timezone, and participant availability.",
         "operationId": "SlotsController_getAvailableSlots",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "$ref": "#/components/responses/defaults"
+        "parameters": [
+          {
+            "name": "startTime",
+            "in": "query",
+            "description": "Start date and time for the availability search in ISO 8601 format (e.g., 2024-09-29T19:06:56.143222-05:00)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-09-29T19:06:56.143222-05:00"
+            }
           },
+          {
+            "name": "endTime",
+            "in": "query",
+            "description": "End date and time for the availability search in ISO 8601 format (e.g., 2024-10-06T19:06:56.143222-05:00)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-10-06T19:06:56.143222-05:00"
+            }
+          },
+          {
+            "name": "eventTypeId",
+            "in": "query",
+            "description": "Type of event to retrieve available slots for (e.g., meeting, consultation)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 22
+            }
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "description": "Timezone to consider when retrieving slots (e.g., America/Bogota)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "America/Bogota"
+            }
+          },
+          {
+            "name": "usernameList",
+            "in": "query",
+            "description": "List of usernames to consider for availability. Must be an array of strings.",
+            "required": true,
+            "style": "deepObject",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": "john_doe"
+              },
+              "example": ["john_doe", "jane_smith"]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for paginated results",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page for paginated results",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
           "200": {
-            "description": "",
+            "description": "A list of available time slots matching the specified criteria.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/SlotsResponse"
+                },
+                "examples": {
+                  "example-1": {
+                    "summary": "Sample response with available slots",
+                    "value": {
+                      "data": [
+                        {
+                          "start": "2024-09-30T14:00:00-05:00",
+                          "end": "2024-09-30T14:30:00-05:00",
+                          "timezone": "America/Bogota",
+                          "eventType": "meeting",
+                          "participants": ["john_doe", "jane_smith"]
+                        },
+                        {
+                          "start": "2024-09-30T15:00:00-05:00",
+                          "end": "2024-09-30T15:30:00-05:00",
+                          "timezone": "America/Bogota",
+                          "eventType": "meeting",
+                          "participants": ["john_doe", "jane_smith"]
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "pageSize": 10,
+                        "totalPages": 5,
+                        "totalItems": 50
+                      }
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestException"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/defaults"
           }
         },
         "tags": [
           "Slots"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
         ]
       }
     },
@@ -8004,10 +8138,10 @@
       "DaySlots": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/Slot"
+          "$ref": "#/components/schemas/XSlot"
         }
       },
-      "Slot": {
+      "XSlot": {
         "type": "object",
         "properties": {
           "userId": {
@@ -9365,10 +9499,7 @@
             "type": "string"
           },
           "guests": {
-            "type": "array",
-            "items": {
               "type": "string"
-            }
           },
           "location": {
             "$ref": "#/components/schemas/Location"
@@ -10020,15 +10151,295 @@
             }
           }
         }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-09-30T00:08:33.913Z"
+          },
+          "path": {
+            "type": "string",
+            "example": "/v2/slots/available?end=2024-10-06T19%3A06%3A56.143222-05%3A00&start=2024-09-29T19%3A06%3A56.143222-05%3A00&timezone=America%2FBogota"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetails"
+          }
+        },
+        "required": ["status", "timestamp", "path", "error"]
+      },
+      "ErrorDetails": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            }
+          }
+        },
+        "required": ["errors"]
+      },
+      "Slot": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 formatted datetime string representing the slot time.",
+            "example": "2024-09-30T14:00:00.000Z"
+          }
+        },
+        "required": ["time"]
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "example": 10
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 5
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 50
+          }
+        },
+        "required": ["page", "pageSize", "totalPages", "totalItems"]
+      },
+      "SlotsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "slots": {
+                "type": "object",
+                "description": "A mapping of dates to their available time slots.",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Slot"
+                  }
+                },
+                "example": {
+                  "2024-09-30": [
+                    {"time": "2024-09-30T14:00:00.000Z"},
+                    {"time": "2024-09-30T14:10:00.000Z"}
+                  ]
+                }
+              }
+            },
+            "required": ["slots"]
+          }
+        },
+        "required": ["data"]
+      },
+      "ErrorDetail": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object"
+          },
+          "property": {
+            "type": "string"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "constraints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["property", "constraints"]
       }
     },
     "responses": {
-      "defaults": {
-        "description": "Default response for all endpoints",
+      "BadRequestException": {
+        "description": "Bad Request Exception",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/DefaultResponse"
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "timestamp": "2024-09-30T00:08:33.913Z",
+              "path": "/v2/slots/available?end=2024-10-06T19%3A06%3A56.143222-05%3A00&start=2024-09-29T19%3A06%3A56.143222-05%3A00&timezone=America%2FBogota",
+              "error": {
+                "errors": [
+                  {
+                    "target": {},
+                    "property": "startTime",
+                    "children": [],
+                    "constraints": {
+                      "isDateString": "startTime must be a valid ISO 8601 date string"
+                    }
+                  },
+                  {
+                    "target": {},
+                    "property": "endTime",
+                    "children": [],
+                    "constraints": {
+                      "isDateString": "endTime must be a valid ISO 8601 date string"
+                    }
+                  },
+                  {
+                    "target": {},
+                    "property": "usernameList",
+                    "children": [],
+                    "constraints": {
+                      "isString": "each value in usernameList must be a string",
+                      "isArray": "usernameList must be an array"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "timestamp": "2024-09-30T00:08:33.913Z",
+              "path": "/v2/slots/available",
+              "error": {
+                "errors": [
+                  {
+                    "property": "authorization",
+                    "constraints": {
+                      "required": "Authorization header is missing",
+                      "invalidBearerFormat": "Authorization header must be in Bearer format"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "timestamp": "2024-09-30T00:08:33.913Z",
+              "path": "/v2/slots/available",
+              "error": {
+                "errors": [
+                  {
+                    "property": "access",
+                    "constraints": {
+                      "noPermission": "You do not have permission to access this resource"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "timestamp": "2024-09-30T00:08:33.913Z",
+              "path": "/v2/slots/available",
+              "error": {
+                "errors": [
+                  {
+                    "property": "resource",
+                    "constraints": {
+                      "notFound": "The requested resource was not found"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "timestamp": "2024-09-30T00:08:33.913Z",
+              "path": "/v2/slots/available",
+              "error": {
+                "errors": [
+                  {
+                    "property": "server",
+                    "constraints": {
+                      "internalError": "An unexpected error occurred on the server"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "defaults": {
+        "description": "Unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "error",
+              "timestamp": "2024-09-30T00:08:33.913Z",
+              "path": "/v2/slots/available",
+              "error": {
+                "errors": [
+                  {
+                    "property": "unknown",
+                    "constraints": {
+                      "unknownError": "An unknown error has occurred"
+                    }
+                  }
+                ]
+              }
             }
           }
         }
