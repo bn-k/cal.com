@@ -3270,7 +3270,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "$ref": "#/components/schemas/GetBookingOutput"
                 }
               }
             }
@@ -9133,10 +9134,10 @@
             "type": "object"
           },
           "seatsShowAttendees": {
-            "type": "object"
+            "type": "boolean"
           },
           "seatsShowAvailabilityCount": {
-            "type": "object"
+            "type": "boolean"
           },
           "team": {
             "type": "object",
@@ -9206,15 +9207,14 @@
       "GetBookingsDataEntry": {
         "type": "object",
         "properties": {
-          "id": {
-            "$ref": "#/components/schemas/ID"
-          },
           "title": {
             "type": "string"
           },
-          "userPrimaryEmail": {
-            "type": "string",
-            "nullable": true
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "uid": {
+            "type": "string"
           },
           "description": {
             "type": "string",
@@ -9223,11 +9223,54 @@
           "customInputs": {
             "type": "object"
           },
+          "smsReminderNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "recurringEventId": {
+            "type": "string",
+            "nullable": true
+          },
           "startTime": {
+            "format": "date-time",
             "type": "string"
           },
           "endTime": {
+            "format": "date-time",
             "type": "string"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "responses": {
+            "$ref": "#/components/schemas/Response"
+          },
+          "rejectionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "userPrimaryEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "user": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
           },
           "attendees": {
             "type": "array",
@@ -9235,25 +9278,12 @@
               "$ref": "#/components/schemas/Attendee"
             }
           },
-          "metadata": {
-            "type": "object"
-          },
-          "uid": {
-            "type": "string"
-          },
-          "recurringEventId": {
-            "type": "string",
-            "nullable": true
-          },
-          "location": {
-            "type": "string",
+          "eventTypeId": {
+            "type": "number",
             "nullable": true
           },
           "eventType": {
             "$ref": "#/components/schemas/EventType"
-          },
-          "status": {
-            "type": "object"
           },
           "paid": {
             "type": "boolean"
@@ -9278,14 +9308,6 @@
             "items": {
               "type": "object"
             }
-          },
-          "user": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              }
-            ]
           },
           "rescheduled": {
             "type": "object"
@@ -9409,7 +9431,7 @@
             "nullable": true
           },
           "responses": {
-            "type": "object"
+            "$ref": "#/components/schemas/Response"
           },
           "rejectionReason": {
             "type": "string",
@@ -9499,7 +9521,9 @@
             "type": "string"
           },
           "guests": {
-              "type": "string"
+              "type": "array",
+              "items": {
+              }
           },
           "location": {
             "$ref": "#/components/schemas/Location"
@@ -10154,25 +10178,7 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "example": "error"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-09-30T00:08:33.913Z"
-          },
-          "path": {
-            "type": "string",
-            "example": "/v2/slots/available?end=2024-10-06T19%3A06%3A56.143222-05%3A00&start=2024-09-29T19%3A06%3A56.143222-05%3A00&timezone=America%2FBogota"
-          },
-          "error": {
-            "$ref": "#/components/schemas/ErrorDetails"
-          }
-        },
-        "required": ["status", "timestamp", "path", "error"]
+        "additionalProperties": true
       },
       "ErrorDetails": {
         "type": "object",
